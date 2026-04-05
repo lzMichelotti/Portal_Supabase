@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Links</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-1: #101827;
+            --bg-2: #1b273a;
+            --bg-3: #27364f;
+            --surface-1: #1a2536;
+            --surface-2: #223047;
+            --surface-3: #2a3b55;
+            --ink: #e9f1fb;
+            --muted: #a8bad4;
+            --line: #344967;
+            --card: #1d2a3d;
+            --accent: #4e9eff;
+            --brand-1: #4e9eff;
+            --brand-2: #37b18c;
+            --brand-3: #d37784;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            color: var(--ink);
+            background: linear-gradient(145deg, var(--bg-1), var(--bg-2) 48%, var(--bg-3));
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .bg-triad {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            pointer-events: none;
+        }
+
+        .bg-panel {
+            background-size: cover;
+            background-position: center;
+            filter: saturate(0.8) contrast(1.05);
+            transform: scale(1.03);
+        }
+
+        .bg-panel-1 {
+            background-image: linear-gradient(rgba(11, 23, 40, 0.62), rgba(11, 23, 40, 0.72)),
+                url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80');
+        }
+
+        .bg-panel-2 {
+            background-image: linear-gradient(rgba(11, 23, 40, 0.62), rgba(11, 23, 40, 0.72)),
+                url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80');
+        }
+
+        .bg-panel-3 {
+            background-image: linear-gradient(rgba(11, 23, 40, 0.62), rgba(11, 23, 40, 0.72)),
+                url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80');
+        }
+
+        .bg-triad::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 12%, rgba(112, 154, 220, 0.22), transparent 45%),
+                radial-gradient(circle at 80% 14%, rgba(51, 103, 176, 0.2), transparent 40%),
+                linear-gradient(180deg, rgba(8, 15, 26, 0.5), rgba(8, 15, 26, 0.7));
+        }
+
+        .page-shell {
+            max-width: 1180px;
+            margin: 40px auto;
+            padding: 0 16px;
+            animation: fade-in-up 0.6s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero {
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(140deg, #1d2c42 0%, #253750 100%);
+            padding: 24px;
+            box-shadow: 0 20px 45px rgba(6, 11, 19, 0.35);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.4rem, 1rem + 2vw, 2.1rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .btn-add {
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 20px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(120deg, #2b7ae0, #55a5ff);
+            box-shadow: 0 10px 24px rgba(21, 88, 170, 0.45);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(21, 88, 170, 0.55);
+        }
+
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin: 18px 0 22px;
+        }
+
+        .company-chip {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: linear-gradient(150deg, rgba(36, 52, 76, 0.95), rgba(30, 43, 63, 0.92));
+            backdrop-filter: blur(3px);
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 10px 24px rgba(4, 8, 14, 0.2);
+        }
+
+        .company-chip img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #2e415d;
+            background: #fff;
+        }
+
+        .company-chip small {
+            color: var(--muted);
+            display: block;
+            line-height: 1.2;
+        }
+
+        .company-chip strong {
+            display: block;
+            line-height: 1.2;
+            font-size: 0.95rem;
+        }
+
+        .tabs-shell {
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--card);
+            box-shadow: 0 22px 52px rgba(5, 9, 16, 0.35);
+            overflow: hidden;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, #1f2d43, #1b283c);
+            padding: 10px 10px 0;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+
+        .nav-tabs .nav-item {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .nav-tabs .nav-link {
+            border: 0;
+            border-radius: 12px 12px 0 0;
+            color: var(--muted);
+            font-weight: 700;
+            padding: 10px 14px;
+            white-space: nowrap;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--ink);
+            background: #243650;
+            box-shadow: inset 0 -3px 0 var(--accent);
+        }
+
+        .tab-content {
+            padding: 20px;
+            background: #1b283c;
+        }
+
+        .link-card {
+            border: 1px solid #344a67;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            display: block;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: linear-gradient(180deg, #25364f, #223148);
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(6, 11, 20, 0.35);
+        }
+
+        .link-title {
+            margin: 0;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .link-desc {
+            margin: 6px 0 2px;
+            color: var(--muted);
+        }
+
+        .link-url {
+            font-size: 0.82rem;
+            color: #85b8ff;
+            word-break: break-all;
+        }
+
+        .empty-state {
+            border: 1px dashed #4a6081;
+            border-radius: 14px;
+            padding: 18px;
+            background: #23334b;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .modal-content {
+            background: #1e2c41;
+            color: var(--ink);
+            border: 1px solid #324866;
+            border-radius: 14px;
+        }
+
+        .modal-header,
+        .modal-footer {
+            border-color: #304562;
+        }
+
+        .btn-close {
+            filter: invert(1) brightness(1.15);
+        }
+
+        .form-label {
+            color: #d6e4f7;
+            font-weight: 600;
+        }
+
+        .form-control,
+        .form-select {
+            background: #25364f;
+            color: #eaf1fc;
+            border-color: #3d5373;
+        }
+
+        .form-control::placeholder {
+            color: #9eb0cb;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #69adff;
+            box-shadow: 0 0 0 0.2rem rgba(88, 157, 241, 0.2);
+            background: #25364f;
+            color: #eaf1fc;
+        }
+
+        .btn-secondary {
+            background: #425978;
+            border-color: #425978;
+        }
+
+        .btn-secondary:hover {
+            background: #4d678a;
+            border-color: #4d678a;
+        }
+
+        .btn-primary {
+            background: #2f83ea;
+            border-color: #2f83ea;
+        }
+
+        .btn-primary:hover {
+            background: #3c90f4;
+            border-color: #3c90f4;
+        }
+
+        .tab-pane[data-company='Empresa 1'] .link-card { border-left: 4px solid var(--brand-1); }
+        .tab-pane[data-company='Empresa 2'] .link-card { border-left: 4px solid var(--brand-2); }
+        .tab-pane[data-company='Empresa 3'] .link-card { border-left: 4px solid var(--brand-3); }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 991px) {
+            .bg-triad {
+                grid-template-columns: 1fr;
+            }
+
+            .bg-panel {
+                display: none;
+            }
+
+            .bg-panel-1 {
+                display: block;
+                transform: none;
+            }
+
+            .companies-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-triad" aria-hidden="true">
+    <div class="bg-panel bg-panel-1"></div>
+    <div class="bg-panel bg-panel-2"></div>
+    <div class="bg-panel bg-panel-3"></div>
+</div>
+
+<div class="page-shell">
+    <div class="hero">
+        <div>
+            <h1>Portal Corporativo de Links</h1>
+        </div>
+        <button type="button" class="btn-add" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+            + Adicionar Link
+        </button>
+    </div>
+
+    <div class="companies-grid">
+        <div class="company-chip">
+            <img src="{{ url_for('static', filename='Logo_magni.jpg') }}" alt="Logo da Magni Assessoria Empresarial">
+            <div>
+                <strong>Magni Assessoria Empresarial</strong>
+            </div>
+        </div>
+        <div class="company-chip">
+            <img src="{{ url_for('static', filename='Logo_magnicred.jpg') }}" alt="Logo da MagniCred">
+            <div>
+                <strong>MagniCred</strong>
+            </div>
+        </div>
+        <div class="company-chip">
+            <img src="{{ url_for('static', filename='Logo_BTadvogados.jpg') }}" alt="Logo da BT Advogados">
+            <div>
+                <strong>BT Advogados</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs-shell">
+    <ul class="nav nav-tabs" id="minhasAbas" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="emp1-tab" data-bs-toggle="tab" data-bs-target="#emp1" type="button" role="tab">Magni Assessoria Empresarial</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="emp2-tab" data-bs-toggle="tab" data-bs-target="#emp2" type="button" role="tab">MagniCred</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="emp3-tab" data-bs-toggle="tab" data-bs-target="#emp3" type="button" role="tab">BT Advogados</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="conteudoAbas">
+        
+        {% for nome_empresa, lista_acessos in dados.items() %}
+        <div class="tab-pane fade {% if loop.index == 1 %}show active{% endif %}" id="emp{{ loop.index }}" role="tabpanel" data-company="{{ nome_empresa }}">
+            
+            {% if lista_acessos %}
+                <div>
+                    {% for acesso in lista_acessos %}
+                    <a href="{{ acesso.url }}" target="_blank" class="link-card">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="link-title">{{ acesso.titulo }}</h5>
+                        </div>
+                        <p class="link-desc">{{ acesso.descricao }}</p>
+                        <small class="link-url">{{ acesso.url }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">Nenhum link cadastrado para esta empresa ainda.</p>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+        
+    </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCadastro" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Novo Link</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/adicionar" method="POST">
+          <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label">Empresa</label>
+                  <select name="empresa" class="form-select" required>
+                      <option value="Empresa 1">Magni Assessoria Empresarial</option>
+                      <option value="Empresa 2">MagniCred</option>
+                      <option value="Empresa 3">BT Advogados</option>
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Título do Sistema</label>
+                  <input type="text" name="titulo" class="form-control" required placeholder="Ex: Sistema de Ponto">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">URL (Link)</label>
+                  <input type="url" name="url" class="form-control" required placeholder="https://...">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Descrição</label>
+                  <textarea name="descricao" class="form-control" rows="2" placeholder="O que faz este sistema?"></textarea>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Link</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
