@@ -19,13 +19,3 @@ Este projeto foi construído focando em simplicidade e performance, utilizando a
 **Infraestrutura e Deploy:**
 * [Docker](https://www.docker.com/) - Conteinerização da aplicação.
 * [Docker Compose](https://docs.docker.com/compose/) - Orquestração do container e mapeamento de portas/volumes.
-
----
-
-## ⚙omo rodar o projeto localmente (Ambiente de Desenvolvimento)
-
-Se você deseja testar ou modificar o código no seu próprio computador, siga os passos abaixo:
-
-1. **Clone o repositório ou acesse a pasta do projeto:**
-   ```bash
-   cd portal_links
