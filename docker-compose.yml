@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  portal_links:
+    build: .
+    container_name: portal_links_app
+    restart: always
+    ports:
+      # O Z-PRO deve estar usando a 80 e 443. 
+      - "5050:5000"
+    volumes:
+      # MUITO IMPORTANTE: Isso cria um "túnel" para o seu banco de dados.
+      # Se o container reiniciar, os seus links salvos não serão apagados.
+      - ./banco.sqlite:/app/banco.sqlite
