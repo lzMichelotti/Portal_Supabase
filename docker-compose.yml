@@ -1,14 +1,40 @@
-version: '3.8'
-
 services:
-  portal_links:
-    build: .
-    container_name: portal_links_app
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: magni_postgres
     restart: always
+    environment:
+      POSTGRES_USER: magni
+      POSTGRES_PASSWORD: magni1234
+      POSTGRES_DB: magni_db
     ports:
-      # O Z-PRO deve estar usando a 80 e 443. 
-      - "5050:5000"
+      - "5440:5432"
     volumes:
-      # MUITO IMPORTANTE: Isso cria um "túnel" para o seu banco de dados.
-      # Se o container reiniciar, os seus links salvos não serão apagados.
-      - ./banco.sqlite:/app/banco.sqlite
+      - magni_pg_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: magni_backend
+    restart: always
+    depends_on:
+      - postgres_db
+    environment:
+      DATABASE_URL: postgresql://magni:magni1234@postgres_db:5432/magni_db
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: magni_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  magni_pg_data:
