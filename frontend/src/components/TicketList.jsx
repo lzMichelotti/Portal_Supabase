@@ -17,7 +17,7 @@ function formatDate(dateInput) {
   }).format(date);
 }
 
-function TicketList({ items, onOpenTicket }) {
+function TicketList({ items, onOpenTicket, onClearResolved }) {
   const columns = [
     { key: "Aberto", title: "Abertos" },
     { key: "Em Andamento", title: "Em Andamento" },
@@ -27,13 +27,27 @@ function TicketList({ items, onOpenTicket }) {
     items: items.filter((ticket) => ticket.status === column.key)
   }));
 
+  const resolvedCount = columns.find((col) => col.key === "Resolvido")?.items.length || 0;
+
   return (
     <div className="ticket-board">
       <div className="ticket-board__head">
         {columns.map((column) => (
           <div key={column.key} className="ticket-board__head-item">
-            <strong>{column.title}</strong>
-            <span>{column.items.length}</span>
+            <div>
+              <strong>{column.title}</strong>
+              <span>{column.items.length}</span>
+            </div>
+            {column.key === "Resolvido" && resolvedCount > 0 && (
+              <button
+                type="button"
+                className="btn btn--danger btn--small"
+                onClick={onClearResolved}
+                title="Limpar todos os chamados resolvidos"
+              >
+                Limpar
+              </button>
+            )}
           </div>
         ))}
       </div>

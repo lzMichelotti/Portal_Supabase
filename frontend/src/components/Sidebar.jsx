@@ -1,3 +1,5 @@
+import logoMagni from "../assets/Logo_magni.jpg";
+
 const navItems = [
   { id: "links", label: "Portal de Links" },
   { id: "helpdesk", label: "Helpdesk" }
@@ -7,7 +9,7 @@ function Sidebar({ activeTab, onChangeTab }) {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <span className="sidebar__brand-mark" aria-hidden="true">MP</span>
+        <img src={logoMagni} alt="Logo Magni" className="sidebar__brand-logo" />
         <div>
           <strong>Magni Portal</strong>
           <small>Intranet Corporativa</small>

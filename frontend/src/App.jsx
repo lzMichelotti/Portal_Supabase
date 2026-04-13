@@ -5,7 +5,7 @@ import NewTicketModal from "./components/NewTicketModal";
 import TicketDetailModal from "./components/TicketDetailModal";
 import Sidebar from "./components/Sidebar";
 import TicketList from "./components/TicketList";
-import { createChamado, createLink, getChamados, getEmpresas, getLinks, updateChamado } from "./api";
+import { createChamado, createLink, getChamados, getEmpresas, getLinks, updateChamado, deleteLink, clearResolvedTickets } from "./api";
 import logoBtAdvogados from "./assets/Logo_BTadvogados.jpg";
 import logoMagni from "./assets/Logo_magni.jpg";
 import logoMagniCred from "./assets/Logo_magnicred.jpg";
@@ -174,6 +174,35 @@ function App() {
     }
   }
 
+  async function handleDeleteLink(linkId) {
+    if (!confirm("Tem certeza que deseja deletar este link?")) {
+      return;
+    }
+
+    try {
+      await deleteLink(linkId);
+      setLinks((prev) => prev.filter((link) => link.id !== linkId));
+    } catch {
+      setError("Erro ao deletar link.");
+    }
+  }
+
+  async function handleClearResolvedTickets() {
+    if (!confirm("Tem certeza que deseja limpar todos os chamados resolvidos? Esta ação não pode ser desfeita.")) {
+      return;
+    }
+
+    try {
+      setSubmittingTicketUpdate(true);
+      await clearResolvedTickets();
+      setChamados((prev) => prev.filter((ticket) => ticket.status !== "Resolvido"));
+    } catch {
+      setError("Erro ao limpar chamados resolvidos.");
+    } finally {
+      setSubmittingTicketUpdate(false);
+    }
+  }
+
   return (
     <div className="layout">
       <Sidebar activeTab={activeTab} onChangeTab={setActiveTab} />
@@ -228,6 +257,7 @@ function App() {
                   key={selectedCompany}
                   title={selectedCompany}
                   items={groupedLinks[selectedCompany] || []}
+                  onDeleteLink={handleDeleteLink}
                 />
               ) : (
                 <p className="empty-state">Selecione uma empresa para visualizar os links.</p>
@@ -248,7 +278,7 @@ function App() {
                 </button>
               </div>
 
-              <TicketList items={filteredChamados} onOpenTicket={openTicketDetail} />
+              <TicketList items={filteredChamados} onOpenTicket={openTicketDetail} onClearResolved={handleClearResolvedTickets} />
             </section>
           )}
         </main>

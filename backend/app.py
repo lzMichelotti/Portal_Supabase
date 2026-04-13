@@ -14,10 +14,13 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://192.168.145.11:5173",
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],    
     allow_headers=["*"],
+    
+    
 )
 
 # Injeção de dependência do Banco de Dados
@@ -159,3 +162,10 @@ def delete_chamado(chamado_id: int, db: DBDep):
     db.delete(db_chamado)
     db.commit()
     return {"mensagem": "Chamado excluído com sucesso"}
+
+@app.delete("/chamados/status/resolvido")
+def delete_resolved_chamados(db: DBDep):
+    """Deleta todos os chamados com status 'Resolvido'"""
+    chamados_deletados = db.query(Chamado).filter(Chamado.status == "Resolvido").delete()
+    db.commit()
+    return {"mensagem": f"{chamados_deletados} chamado(s) resolvido(s) excluído(s) com sucesso", "quantidade": chamados_deletados}

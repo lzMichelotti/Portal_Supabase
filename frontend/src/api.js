@@ -52,3 +52,15 @@ export function createLink(payload) {
     body: JSON.stringify(payload)
   });
 }
+
+export function deleteLink(linkId) {
+  return request(`/links/${linkId}`, {
+    method: "DELETE"
+  });
+}
+
+export function clearResolvedTickets() {
+  return request("/chamados/status/resolvido", {
+    method: "DELETE"
+  });
+}
