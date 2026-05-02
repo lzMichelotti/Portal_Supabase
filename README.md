@@ -59,3 +59,21 @@ npm run dev
 ```
 
 Frontend disponivel em http://localhost:5173.
+
+## Deploy em Produção
+
+### Supabase
+
+Use a connection string do Supabase em `DATABASE_URL` e defina `DATABASE_SSLMODE=require` no backend.
+Se quiser manter os dados iniciais de empresa, deixe `RUN_SEED_DB=true`.
+
+### Vercel
+
+No frontend, defina `VITE_API_URL` apontando para a URL pública do backend.
+Se a API estiver em outro domínio, adicione a origem do Vercel em `CORS_ORIGINS` no backend.
+
+Arquivos de apoio:
+
+- [backend/.env.example](backend/.env.example)
+- [frontend/.env.example](frontend/.env.example)
+- [frontend/vercel.json](frontend/vercel.json)

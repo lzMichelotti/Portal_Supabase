@@ -13,7 +13,8 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+RUN chmod +x /app/start.sh
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "until pg_isready -h postgres_db -p 5432 -U magni; do echo 'Aguardando banco...'; sleep 2; done; python seed.py && uvicorn app:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "/app/start.sh"]

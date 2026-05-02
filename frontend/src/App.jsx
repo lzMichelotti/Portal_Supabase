@@ -1,11 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
+import AgendaPanel from "./components/AgendaPanel";
+import ChatbotPanel from "./components/ChatbotPanel";
 import LinkSection from "./components/LinkSection";
 import NewLinkModal from "./components/NewLinkModal";
 import NewTicketModal from "./components/NewTicketModal";
+import TicketHistoryModal from "./components/TicketHistoryModal";
 import TicketDetailModal from "./components/TicketDetailModal";
 import Sidebar from "./components/Sidebar";
 import TicketList from "./components/TicketList";
-import { createChamado, createLink, getChamados, getEmpresas, getLinks, updateChamado, deleteLink, clearResolvedTickets } from "./api";
+import {
+  createChamado,
+  createLink,
+  deleteLink,
+  getChamados,
+  getEmpresas,
+  getLinks,
+  updateChamado
+} from "./api";
 import logoBtAdvogados from "./assets/Logo_BTadvogados.jpg";
 import logoMagni from "./assets/Logo_magni.jpg";
 import logoMagniCred from "./assets/Logo_magnicred.jpg";
@@ -57,6 +68,7 @@ function App() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isTicketDetailOpen, setIsTicketDetailOpen] = useState(false);
   const [submittingTicketUpdate, setSubmittingTicketUpdate] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -108,14 +120,25 @@ function App() {
     return groups;
   }, [links, empresasMap]);
 
-  const filteredChamados = useMemo(() => {
-    const mergedChamados = chamados.map((chamado) => ({
+  const chamadosComEmpresa = useMemo(() => {
+    return chamados.map((chamado) => ({
       ...chamado,
       empresaNome: empresasMap.get(chamado.empresa_id) || "Nao informado"
     }));
-
-    return mergedChamados;
   }, [chamados, empresasMap]);
+
+  const chamadosAtivos = useMemo(
+    () => chamadosComEmpresa.filter((chamado) => chamado.status !== "Resolvido"),
+    [chamadosComEmpresa]
+  );
+
+  const chamadosHistorico = useMemo(
+    () =>
+      chamadosComEmpresa
+        .filter((chamado) => chamado.status === "Resolvido")
+        .sort((a, b) => new Date(b.atualizado_em || b.criado_em) - new Date(a.atualizado_em || a.criado_em)),
+    [chamadosComEmpresa]
+  );
 
   async function handleCreateTicket(formData) {
     try {
@@ -156,6 +179,14 @@ function App() {
     setSelectedTicket(null);
   }
 
+  function openHistory() {
+    setIsHistoryOpen(true);
+  }
+
+  function closeHistory() {
+    setIsHistoryOpen(false);
+  }
+
   async function handleUpdateTicket(ticketId, payload) {
     try {
       setSubmittingTicketUpdate(true);
@@ -184,22 +215,6 @@ function App() {
       setLinks((prev) => prev.filter((link) => link.id !== linkId));
     } catch {
       setError("Erro ao deletar link.");
-    }
-  }
-
-  async function handleClearResolvedTickets() {
-    if (!confirm("Tem certeza que deseja limpar todos os chamados resolvidos? Esta ação não pode ser desfeita.")) {
-      return;
-    }
-
-    try {
-      setSubmittingTicketUpdate(true);
-      await clearResolvedTickets();
-      setChamados((prev) => prev.filter((ticket) => ticket.status !== "Resolvido"));
-    } catch {
-      setError("Erro ao limpar chamados resolvidos.");
-    } finally {
-      setSubmittingTicketUpdate(false);
     }
   }
 
@@ -265,20 +280,44 @@ function App() {
             </section>
           )}
 
+          {!loading && !error && activeTab === "agenda" && (
+            <AgendaPanel title="Google Calendar" />
+          )}
+
+          {!loading && !error && activeTab === "agenda-teste" && (
+            <section className="agenda-test-layout">
+              <div className="agenda-test-layout__main">
+                <AgendaPanel title="Agenda" />
+              </div>
+              <div className="agenda-test-layout__side">
+                <ChatbotPanel />
+              </div>
+            </section>
+          )}
+
           {!loading && !error && activeTab === "helpdesk" && (
             <section>
               <div className="section-title-row section-title-row--spread">
                 <h2>Central de Atendimento interno</h2>
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  Abrir Novo Chamado
-                </button>
+                <div className="helpdesk-actions">
+                  <button
+                    type="button"
+                    className="btn btn--secondary"
+                    onClick={openHistory}
+                  >
+                    📁 Histórico
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--primary"
+                    onClick={() => setIsModalOpen(true)}
+                  >
+                    Abrir Novo Chamado
+                  </button>
+                </div>
               </div>
 
-              <TicketList items={filteredChamados} onOpenTicket={openTicketDetail} onClearResolved={handleClearResolvedTickets} />
+              <TicketList items={chamadosAtivos} onOpenTicket={openTicketDetail} />
             </section>
           )}
         </main>
@@ -306,6 +345,13 @@ function App() {
         onClose={closeTicketDetail}
         onSubmit={handleUpdateTicket}
         submitting={submittingTicketUpdate}
+      />
+
+      <TicketHistoryModal
+        open={isHistoryOpen}
+        tickets={chamadosHistorico}
+        onClose={closeHistory}
+        onOpenTicket={openTicketDetail}
       />
     </div>
   );

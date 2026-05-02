@@ -11,6 +11,11 @@ services:
       - "5440:5432"
     volumes:
       - magni_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U magni -d magni_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -18,9 +23,13 @@ services:
     container_name: magni_backend
     restart: always
     depends_on:
-      - postgres_db
+      postgres_db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://magni:magni1234@postgres_db:5432/magni_db
+      DATABASE_SSLMODE: prefer
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      RUN_SEED_DB: "true"
     ports:
       - "8000:8000"
 
@@ -36,5 +45,24 @@ services:
     ports:
       - "5173:80"
 
+# --- Automação e IA ---
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: magni_n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      - N8N_PORT=5678
+      # Quando você for testar chamadas pelo celular na rede local, 
+      # pode ser útil descomentar e usar o seu IP aqui:
+      - WEBHOOK_URL=https://pyritic-unrecurrently-kia.ngrok-free.dev
+    volumes:
+      # Usar volume nomeado é mais seguro que o ~/.n8n para migrar de servidor depois
+      - n8n_data:/home/node/.n8n
+
 volumes:
   magni_pg_data:
+  n8n_data:

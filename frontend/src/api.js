@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -9,8 +9,21 @@ async function request(path, options = {}) {
   });
 
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || "Erro ao comunicar com a API.");
+    const contentType = response.headers.get("content-type") || "";
+    let message = "";
+
+    try {
+      if (contentType.includes("application/json")) {
+        const data = await response.json();
+        message = data?.detail || data?.message || JSON.stringify(data);
+      } else {
+        message = await response.text();
+      }
+    } catch {
+      message = "";
+    }
+
+    throw new Error(message || `Erro HTTP ${response.status}.`);
   }
 
   if (response.status === 204) {
@@ -61,6 +74,30 @@ export function deleteLink(linkId) {
 
 export function clearResolvedTickets() {
   return request("/chamados/status/resolvido", {
+    method: "DELETE"
+  });
+}
+
+export function getAgenda() {
+  return request("/agenda");
+}
+
+export function createAgendaEvent(payload) {
+  return request("/agenda", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function updateAgendaEvent(eventId, payload) {
+  return request(`/agenda/${eventId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function deleteAgendaEvent(eventId) {
+  return request(`/agenda/${eventId}`, {
     method: "DELETE"
   });
 }

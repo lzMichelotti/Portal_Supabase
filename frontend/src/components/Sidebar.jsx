@@ -2,6 +2,8 @@ import logoMagni from "../assets/Logo_magni.jpg";
 
 const navItems = [
   { id: "links", label: "Portal de Links" },
+  { id: "agenda", label: "Agenda" },
+  { id: "agenda-teste", label: "Agenda Teste" },
   { id: "helpdesk", label: "Helpdesk" }
 ];
 

@@ -5,8 +5,13 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://magni:magni1234@127.0.0.1:5440/magni_db")
+DATABASE_SSLMODE = os.getenv("DATABASE_SSLMODE", "prefer")
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    connect_args={"sslmode": DATABASE_SSLMODE},
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -45,6 +50,19 @@ class Chamado(Base):
     atualizado_em = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     empresa = relationship("Empresa", back_populates="chamados")
+
+
+class AgendaEvento(Base):
+    __tablename__ = "agenda_eventos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    titulo = Column(String(255), nullable=False)
+    data_inicio = Column(DateTime, nullable=False)
+    data_fim = Column(DateTime, nullable=False)
+    local = Column(String(255), nullable=True)
+    descricao = Column(Text, nullable=True)
+    criado_em = Column(DateTime, default=datetime.now)
+    atualizado_em = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 ## USEI CODIGO A BAIXO PARA ADICIONAR UMA COLUNA, USAR O MESMO PARA ADICIONAR COLUNAS SE NECESSÁRIO
 
