@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { API_BASE_URL } from "../api";
 
-const CHAT_WEBHOOK_URL = `${API_BASE_URL}/chatbot/n8n`;
+const CHAT_WEBHOOK_URL = import.meta.env.VITE_CHATBOT_WEBHOOK || null;
 
 function createMessage(role, content) {
   return {
@@ -93,6 +92,15 @@ function ChatbotPanel() {
 
     const trimmed = inputValue.trim();
     if (!trimmed || isSending) {
+      return;
+    }
+
+    if (!CHAT_WEBHOOK_URL) {
+      setError("Chatbot desabilitado: nenhum webhook configurado.");
+      setMessages((previous) => [
+        ...previous,
+        createMessage("assistant", "Chatbot está desabilitado no momento.")
+      ]);
       return;
     }
 

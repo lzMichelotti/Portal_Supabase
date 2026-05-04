@@ -8,6 +8,9 @@ import TicketHistoryModal from "./components/TicketHistoryModal";
 import TicketDetailModal from "./components/TicketDetailModal";
 import Sidebar from "./components/Sidebar";
 import TicketList from "./components/TicketList";
+import PasswordsPanel from "./components/PasswordsPanel";
+import AuthPanel from "./components/AuthPanel";
+import { getSupabaseClient, getUserRole, onAuthStateChange } from "./lib/supabaseClient";
 import {
   createChamado,
   createLink,
@@ -53,13 +56,29 @@ function normalizeCompanyName(rawCompanyName) {
   return "Geral";
 }
 
+function getTabTitle(tab) {
+  switch (tab) {
+    case "links":
+      return "Portal de Links";
+    case "agenda":
+      return "Agenda";
+    case "senhas":
+      return "Senhas";
+    case "helpdesk":
+      return "Helpdesk";
+    default:
+      return "Dashboard";
+  }
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("links");
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [empresas, setEmpresas] = useState([]);
   const [links, setLinks] = useState([]);
   const [chamados, setChamados] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [error, setError] = useState("");
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [submittingLink, setSubmittingLink] = useState(false);
@@ -69,8 +88,39 @@ function App() {
   const [isTicketDetailOpen, setIsTicketDetailOpen] = useState(false);
   const [submittingTicketUpdate, setSubmittingTicketUpdate] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
+    async function loadAuth() {
+      try {
+        const client = getSupabaseClient();
+        const { data: { user } } = await client.auth.getUser();
+        setUser(user ?? null);
+        setUserRole(user ? getUserRole(user) : null);
+        setAuthReady(true);
+        onAuthStateChange(async (_event, session) => {
+          const u = session?.user ?? null;
+          setUser(u);
+          setUserRole(u ? getUserRole(u) : null);
+        });
+      } catch (e) {
+        setAuthReady(true);
+      }
+    }
+
+    loadAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setEmpresas([]);
+      setLinks([]);
+      setChamados([]);
+      setLoading(false);
+      return;
+    }
+
     async function loadData() {
       setLoading(true);
       setError("");
@@ -91,7 +141,7 @@ function App() {
     }
 
     loadData();
-  }, []);
+  }, [user]);
 
   const empresasMap = useMemo(() => {
     const map = new Map();
@@ -218,12 +268,58 @@ function App() {
     }
   }
 
+  if (!authReady) {
+    return (
+      <div className="login-screen">
+        <aside className="login-screen__card login-screen__card--loading">
+          <div className="login-screen__brand">
+            <img src={logoMagni} alt="Logo Magni" />
+            <div>
+              <h1>Portal de Links</h1>
+              <p>Carregando acesso...</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="login-screen">
+        <div className="login-screen__card">
+          <div className="login-screen__card-header">
+            <h2>Portal</h2>
+            <p>Entre com seu email e senha.</p>
+          </div>
+
+          <AuthPanel onSessionChange={(u, p) => { setUser(u); setUserRole(p?.role ?? null); }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="layout">
-      <Sidebar activeTab={activeTab} onChangeTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} onChangeTab={setActiveTab} userRole={userRole} />
 
       <div className="main-column">
         <main className="content">
+          <header className="dashboard-topbar">
+            <div className="dashboard-topbar__title">
+              <span className="agenda-hero__eyebrow">Sistema interno</span>
+              <h1>{getTabTitle(activeTab)}</h1>
+              <p>Ambiente corporativo seguro para operação e atendimento.</p>
+            </div>
+
+            <div className="dashboard-topbar__meta">
+              <span className={`dashboard-pill ${userRole === "chefe" ? "dashboard-pill--accent" : ""}`}>
+                {userRole === "chefe" ? "Chefe" : "Comum"}
+              </span>
+              <span className="dashboard-pill">{user?.email}</span>
+            </div>
+          </header>
+
           {loading && <p className="feedback">Carregando dados...</p>}
           {error && <p className="feedback feedback--error">{error}</p>}
 
@@ -284,16 +380,7 @@ function App() {
             <AgendaPanel title="Google Calendar" />
           )}
 
-          {!loading && !error && activeTab === "agenda-teste" && (
-            <section className="agenda-test-layout">
-              <div className="agenda-test-layout__main">
-                <AgendaPanel title="Agenda" />
-              </div>
-              <div className="agenda-test-layout__side">
-                <ChatbotPanel />
-              </div>
-            </section>
-          )}
+          {/* 'agenda-teste' removed - no test agenda tab anymore */}
 
           {!loading && !error && activeTab === "helpdesk" && (
             <section>
@@ -318,6 +405,12 @@ function App() {
               </div>
 
               <TicketList items={chamadosAtivos} onOpenTicket={openTicketDetail} />
+            </section>
+          )}
+
+          {!loading && !error && activeTab === "senhas" && (
+            <section>
+              <PasswordsPanel userRole={userRole} />
             </section>
           )}
         </main>
