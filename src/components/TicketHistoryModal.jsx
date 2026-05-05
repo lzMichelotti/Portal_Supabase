@@ -19,7 +19,7 @@ function formatDateTime(value) {
   }).format(date);
 }
 
-function TicketHistoryModal({ open, tickets, onClose, onOpenTicket }) {
+function TicketHistoryModal({ open, tickets, onClose, onOpenTicket, onDelete, userRole }) {
   if (!open) {
     return null;
   }
@@ -73,6 +73,17 @@ function TicketHistoryModal({ open, tickets, onClose, onOpenTicket }) {
                     >
                       Ver detalhes
                     </button>
+                    {userRole === 'chefe' && (
+                      <button
+                        type="button"
+                        className="btn btn--danger btn--small"
+                        onClick={() => {
+                          if (onDelete) onDelete(ticket.id);
+                        }}
+                      >
+                        Deletar
+                      </button>
+                    )}
                   </div>
                 </article>
               ))}

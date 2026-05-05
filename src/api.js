@@ -51,6 +51,11 @@ export async function updateChamado(chamadoId, payload) {
   return data;
 }
 
+export async function deleteChamado(chamadoId) {
+  const { error } = await getClient().from("chamados").delete().eq("id", chamadoId);
+  if (error) throw ensureError(error, "Erro ao deletar chamado.");
+}
+
 export async function createLink(payload) {
   const row = { empresa_id: Number(payload.empresa_id), titulo: payload.titulo, url: payload.url, descricao: payload.descricao ?? null };
   const { data, error } = await getClient().from("links").insert(row).select("*").single();

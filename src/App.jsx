@@ -15,6 +15,7 @@ import {
   createChamado,
   createLink,
   deleteLink,
+  deleteChamado,
   getChamados,
   getEmpresas,
   getLinks,
@@ -268,6 +269,20 @@ function App() {
     }
   }
 
+  async function handleDeleteChamado(chamadoId) {
+    if (!confirm('Tem certeza que deseja deletar este chamado?')) return;
+    try {
+      await deleteChamado(chamadoId);
+      setChamados((prev) => prev.filter((c) => c.id !== chamadoId));
+      // close detail if it was open
+      if (selectedTicket && selectedTicket.id === chamadoId) {
+        closeTicketDetail();
+      }
+    } catch {
+      setError('Erro ao deletar chamado.');
+    }
+  }
+
   async function handleLogout() {
     try {
       await signOut();
@@ -463,6 +478,8 @@ function App() {
         tickets={chamadosHistorico}
         onClose={closeHistory}
         onOpenTicket={openTicketDetail}
+        onDelete={handleDeleteChamado}
+        userRole={userRole}
       />
     </div>
   );
