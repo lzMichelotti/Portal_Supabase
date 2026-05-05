@@ -329,6 +329,11 @@ body {
   justify-content: flex-end;
 }
 
+.dashboard-topbar__logout {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
 .dashboard-pill {
   display: inline-flex;
   align-items: center;

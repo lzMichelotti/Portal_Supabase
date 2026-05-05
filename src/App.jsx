@@ -10,7 +10,7 @@ import Sidebar from "./components/Sidebar";
 import TicketList from "./components/TicketList";
 import PasswordsPanel from "./components/PasswordsPanel";
 import AuthPanel from "./components/AuthPanel";
-import { getSupabaseClient, getUserRole, onAuthStateChange } from "./lib/supabaseClient";
+import { getSupabaseClient, getUserRole, onAuthStateChange, signOut } from "./lib/supabaseClient";
 import {
   createChamado,
   createLink,
@@ -268,6 +268,21 @@ function App() {
     }
   }
 
+  async function handleLogout() {
+    try {
+      await signOut();
+    } finally {
+      setUser(null);
+      setUserRole(null);
+      setActiveTab("links");
+      setSelectedCompany(null);
+      setEmpresas([]);
+      setLinks([]);
+      setChamados([]);
+      setError("");
+    }
+  }
+
   if (!authReady) {
     return (
       <div className="login-screen">
@@ -317,6 +332,9 @@ function App() {
                 {userRole === "chefe" ? "Chefe" : "Comum"}
               </span>
               <span className="dashboard-pill">{user?.email}</span>
+              <button type="button" className="btn btn--ghost dashboard-topbar__logout" onClick={handleLogout}>
+                Sair
+              </button>
             </div>
           </header>
 
@@ -392,7 +410,7 @@ function App() {
                     className="btn btn--secondary"
                     onClick={openHistory}
                   >
-                    📁 Histórico
+                    Histórico
                   </button>
                   <button
                     type="button"

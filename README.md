@@ -66,6 +66,7 @@ Frontend disponivel em http://localhost:5173.
 
 Use a connection string do Supabase em `DATABASE_URL` e defina `DATABASE_SSLMODE=require` no backend.
 Se quiser manter os dados iniciais de empresa, deixe `RUN_SEED_DB=true`.
+Se o frontend mostrar 403 em `links`, o banco ainda nao recebeu as policies/grants de leitura. Execute o arquivo `supabase/setup.sql` no SQL Editor do projeto Supabase.
 
 ### Vercel
 
